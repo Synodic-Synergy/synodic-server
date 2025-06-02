@@ -1,38 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow-sm">
+  <div class="min-h-screen bg-dark-primary">
+    <nav class="bg-dark-secondary border-b border-dark-border">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
-            <div class="flex-shrink-0 flex items-center">
-              <NuxtLink to="/" class="text-xl font-bold text-indigo-600">
-                Synodic Synergy
-              </NuxtLink>
-            </div>
+            <NuxtLink to="/" class="flex items-center">
+              <span class="text-orange-500 font-bold text-xl">Synodic</span>
+              <span class="text-text-primary font-bold text-xl ml-1">Synergy</span>
+            </NuxtLink>
           </div>
-
           <div class="flex items-center">
             <template v-if="authStore.isAuthenticated">
-              <div class="ml-3 relative">
-                <div class="flex items-center space-x-4">
-                  <span class="text-gray-700">
-                    {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
-                  </span>
-                  <button
-                    @click="handleLogout"
-                    class="text-gray-700 hover:text-gray-900"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              </div>
+              <span class="text-text-secondary mr-4">{{ authStore.user?.email }}</span>
+              <button @click="handleLogout" class="btn-secondary">
+                Sign Out
+              </button>
             </template>
             <template v-else>
-              <NuxtLink
-                to="/login"
-                class="text-gray-700 hover:text-gray-900"
-              >
-                Sign in
+              <NuxtLink to="/login" class="btn-primary">
+                Sign In
               </NuxtLink>
             </template>
           </div>
@@ -40,10 +26,8 @@
       </div>
     </nav>
 
-    <main>
-      <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <slot />
-      </div>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <slot />
     </main>
   </div>
 </template>

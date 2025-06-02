@@ -10,7 +10,8 @@ export default defineEventHandler(async (event) => {
     '/api/auth/register-admin',
     '/',
     '/login',
-    '/index'
+    '/index',
+    '/__nuxt_error'  // Add error page to public routes
   ];
   
   // Log the current path for debugging
@@ -20,8 +21,7 @@ export default defineEventHandler(async (event) => {
   const isPublicRoute = publicRoutes.some(route => {
     const isMatch = event.path === route || 
                    event.path.startsWith(route + '/') ||
-                   event.path === route + '.html' ||
-                   event.path === route + '.json';
+                   event.path.startsWith('/__nuxt');  // Allow all Nuxt internal routes
     console.log(`Checking route ${route} against ${event.path}: ${isMatch}`);
     return isMatch;
   });
@@ -31,29 +31,32 @@ export default defineEventHandler(async (event) => {
     return;
   }
 
-  const authHeader = getRequestHeader(event, 'authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized - No token provided'
-    });
-  }
+  // For API routes, require authentication
+  if (event.path.startsWith('/api/')) {
+    const authHeader = getRequestHeader(event, 'authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw createError({
+        statusCode: 401,
+        message: 'Unauthorized - No token provided'
+      });
+    }
 
-  const token = authHeader.split(' ')[1];
-  try {
-    const config = useRuntimeConfig();
-    const secret = new TextEncoder().encode(config.jwtSecret);
-    const { payload } = await jwtVerify(token, secret);
-    
-    // Add user info to event context
-    event.context.auth = {
-      userId: payload.sub,
-      role: payload.role as UserRole
-    };
-  } catch (error) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized - Invalid token'
-    });
+    const token = authHeader.split(' ')[1];
+    try {
+      const config = useRuntimeConfig();
+      const secret = new TextEncoder().encode(config.jwtSecret);
+      const { payload } = await jwtVerify(token, secret);
+      
+      // Add user info to event context
+      event.context.auth = {
+        userId: payload.sub,
+        role: payload.role as UserRole
+      };
+    } catch (error) {
+      throw createError({
+        statusCode: 401,
+        message: 'Unauthorized - Invalid token'
+      });
+    }
   }
 }); 

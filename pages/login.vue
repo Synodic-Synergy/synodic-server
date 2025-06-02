@@ -1,6 +1,18 @@
 <template>
-  <div>
-    <LoginForm />
+  <div class="min-h-[80vh] flex items-center justify-center">
+    <div class="card w-full max-w-md animate-fade-in">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">
+          <span class="text-orange-500">Welcome</span>
+          <span class="text-text-primary"> Back</span>
+        </h1>
+        <p class="text-text-secondary">
+          Sign in to access your account
+        </p>
+      </div>
+
+      <LoginForm />
+    </div>
   </div>
 </template>
 
@@ -12,11 +24,13 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 // Redirect if already authenticated
-if (authStore.isAuthenticated) {
-  if (authStore.isAdmin || authStore.isStaff) {
-    router.push('/teach');
-  } else {
-    router.push('/learn');
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    if (authStore.isAdmin || authStore.isStaff) {
+      router.push('/teach');
+    } else {
+      router.push('/learn');
+    }
   }
-}
+});
 </script> 

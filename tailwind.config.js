@@ -12,31 +12,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#FF6B00',
-          50: '#FFF1E5',
-          100: '#FFE4CC',
-          200: '#FFD1A3',
-          300: '#FFBD7A',
-          400: '#FFA952',
-          500: '#FF6B00',
-          600: '#E66000',
-          700: '#CC5500',
-          800: '#B34B00',
-          900: '#994100'
-        },
-        dark: {
-          DEFAULT: '#1A1A1A',
-          50: '#2C2C2C',
-          100: '#262626',
-          200: '#1F1F1F',
-          300: '#1A1A1A',
-          400: '#141414',
-          500: '#0F0F0F',
-          600: '#0A0A0A',
-          700: '#050505',
-          800: '#000000',
-          900: '#000000'
+        'dark-primary': '#1a1a1a',
+        'dark-secondary': '#2d2d2d',
+        'dark-accent': '#3d3d3d',
+        'dark-surface': '#242424',
+        'dark-border': '#404040',
+        'text-primary': '#ffffff',
+        'text-secondary': '#a0a0a0',
+        'text-muted': '#737373',
+        'orange': {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
         }
       },
       animation: {
@@ -72,8 +66,5 @@ module.exports = {
       }
     }
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/forms')
-  ]
+  plugins: [],
 } 
