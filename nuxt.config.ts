@@ -7,7 +7,8 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@vueuse/motion/nuxt',
-    '@nuxt/image'
+    '@nuxt/image',
+    '@pinia/nuxt'
   ],
   app: {
     head: {
@@ -46,6 +47,18 @@ export default defineNuxtConfig({
     plugins: {
       tailwindcss: {},
       autoprefixer: {}
+    }
+  },
+  runtimeConfig: {
+    jwtSecret: process.env.JWT_SECRET,
+    adminSetupKey: process.env.ADMIN_SETUP_KEY,
+    dataEncryptionKey: process.env.DATA_ENCRYPTION_KEY
+  },
+  nitro: {
+    routeRules: {
+      '/': { cors: true },
+      '/login': { cors: true },
+      '/api/auth/**': { cors: true }
     }
   }
 })

@@ -1,0 +1,466 @@
+# Synodic Server - Open Source Education Management System
+
+## Overview
+Synodic Server is a self-hostable education management system that powers both Synodic Learn (student interface) and Synodic Teach (staff interface). Built with Nuxt 3, TypeScript, and Tailwind CSS, it provides a modern, secure, and feature-rich platform for educational institutions.
+
+## Technical Stack Details
+
+### Frontend
+- **Nuxt 3**
+  - Server-side rendering for SEO
+  - Auto-imports for components and composables
+  - File-based routing
+  - Built-in state management
+  - API routes integration
+
+- **TypeScript**
+  - Strict type checking
+  - Interface definitions for all data structures
+  - Type-safe API calls
+  - Enhanced IDE support
+
+- **Tailwind CSS**
+  - Custom theme configuration
+  - Responsive design utilities
+  - Dark mode support
+  - Custom animations
+  - Component-specific styles
+
+- **UI Components**
+  - Headless UI for accessible components
+  - Heroicons for consistent iconography
+  - Custom form components
+  - Modal dialogs
+  - Dropdown menus
+  - Toast notifications
+
+- **Animations**
+  - GSAP for complex animations
+  - AOS for scroll animations
+  - Page transitions
+  - Loading states
+  - Micro-interactions
+
+### Backend
+- **Authentication**
+  - JWT (jose) for secure tokens
+  - Refresh token rotation
+  - Role-based access control
+  - Session management
+  - Password hashing with bcrypt
+
+- **Data Storage**
+  - Encrypted JSON files
+  - File-based versioning
+  - Backup system
+  - Data validation
+  - Schema enforcement
+
+## Detailed Directory Structure
+```
+synodic-server/
+├── server/
+│   ├── api/
+│   │   ├── auth/
+│   │   │   ├── login.ts
+│   │   │   ├── register.ts
+│   │   │   ├── refresh.ts
+│   │   │   └── logout.ts
+│   │   ├── learn/
+│   │   │   ├── courses/
+│   │   │   ├── assessments/
+│   │   │   ├── notices/
+│   │   │   └── timetable/
+│   │   └── teach/
+│   │       ├── courses/
+│   │       ├── assessments/
+│   │       ├── notices/
+│   │       └── attendance/
+│   └── middleware/
+│       ├── auth.ts
+│       ├── role.ts
+│       └── rate-limit.ts
+├── pages/
+│   ├── learn/
+│   │   ├── index.vue
+│   │   ├── courses/
+│   │   ├── assessments/
+│   │   ├── notices/
+│   │   └── timetable/
+│   ├── teach/
+│   │   ├── index.vue
+│   │   ├── courses/
+│   │   ├── assessments/
+│   │   ├── notices/
+│   │   └── attendance/
+│   └── index.vue
+├── components/
+│   ├── learn/
+│   │   ├── CourseCard.vue
+│   │   ├── AssessmentList.vue
+│   │   ├── NoticeBoard.vue
+│   │   └── Timetable.vue
+│   ├── teach/
+│   │   ├── CourseEditor.vue
+│   │   ├── AssessmentManager.vue
+│   │   ├── NoticeCreator.vue
+│   │   └── AttendanceTracker.vue
+│   └── shared/
+│       ├── Navbar.vue
+│       ├── Footer.vue
+│       ├── Button.vue
+│       └── Modal.vue
+├── types/
+│   ├── user.ts
+│   ├── course.ts
+│   ├── assessment.ts
+│   ├── notice.ts
+│   └── timetable.ts
+├── utils/
+│   ├── encryption.ts
+│   ├── validation.ts
+│   ├── formatting.ts
+│   └── api.ts
+├── composables/
+│   ├── useAuth.ts
+│   ├── useCourses.ts
+│   ├── useAssessments.ts
+│   └── useNotices.ts
+├── stores/
+│   ├── auth.ts
+│   ├── courses.ts
+│   └── ui.ts
+└── data/
+    ├── users/
+    ├── courses/
+    ├── assessments/
+    ├── notices/
+    └── timetables/
+```
+
+## Data Models
+
+### User
+```typescript
+interface User {
+  id: string;
+  email: string;
+  password: string; // hashed
+  role: 'student' | 'staff' | 'admin';
+  firstName: string;
+  lastName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Course
+```typescript
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  content: string; // markdown
+  teacherId: string;
+  resources: Resource[];
+  schedule: Schedule[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Assessment
+```typescript
+interface Assessment {
+  id: string;
+  courseId: string;
+  title: string;
+  description: string;
+  dueDate: Date;
+  submissions: Submission[];
+  maxScore: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+### Notice
+```typescript
+interface Notice {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  startDate: Date;
+  endDate: Date;
+  targetAudience: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## API Endpoints
+
+### Authentication
+```
+POST /api/auth/register-admin    # Only for first admin setup
+POST /api/auth/invite            # Admin only - Generate invite codes
+POST /api/auth/register          # Register with valid invite code
+POST /api/auth/login
+POST /api/auth/refresh
+POST /api/auth/logout
+```
+
+### Learn API
+```
+GET /api/learn/courses
+GET /api/learn/courses/:id
+GET /api/learn/assessments
+GET /api/learn/assessments/:id
+POST /api/learn/assessments/:id/submit
+GET /api/learn/notices
+GET /api/learn/timetable
+```
+
+### Teach API
+```
+POST /api/teach/courses
+PUT /api/teach/courses/:id
+DELETE /api/teach/courses/:id
+POST /api/teach/assessments
+PUT /api/teach/assessments/:id
+POST /api/teach/notices
+POST /api/teach/attendance
+```
+
+## Security Implementation
+
+### Data Encryption
+```typescript
+// Example encryption utility
+const encrypt = (data: any, key: string): string => {
+  // Implementation using crypto-js or similar
+};
+
+const decrypt = (encryptedData: string, key: string): any => {
+  // Implementation using crypto-js or similar
+};
+```
+
+### Authentication Flow
+1. Initial Setup
+   - First admin registration with secure setup key
+   - Setup key stored in environment variables
+   - One-time use only
+
+2. Invite System
+   - Admins generate invite codes
+   - Invite codes are time-limited
+   - Single-use codes
+   - Role-specific invites (staff/student)
+   - Invite tracking and audit logs
+
+3. User Registration
+   - Validate invite code
+   - Create user account
+   - Assign appropriate role
+   - Generate initial credentials
+
+4. Login Flow
+   - User submits credentials
+   - Server validates and generates JWT
+   - JWT stored in secure HTTP-only cookie
+   - Refresh token stored in secure HTTP-only cookie
+   - Access token rotation on refresh
+
+### Invite Code Structure
+```typescript
+interface InviteCode {
+  code: string;          // Unique invite code
+  role: 'staff' | 'student';
+  createdBy: string;     // Admin ID
+  createdAt: Date;
+  expiresAt: Date;
+  used: boolean;
+  usedBy?: string;       // User ID if used
+  usedAt?: Date;
+}
+```
+
+### Rate Limiting
+```typescript
+// Example rate limiting middleware
+const rateLimit = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+};
+```
+
+## UI Components
+
+### Course Card
+```vue
+<template>
+  <div class="course-card">
+    <h3>{{ course.title }}</h3>
+    <p>{{ course.description }}</p>
+    <div class="resources">
+      <!-- Resource list -->
+    </div>
+  </div>
+</template>
+```
+
+### Assessment List
+```vue
+<template>
+  <div class="assessment-list">
+    <div v-for="assessment in assessments" :key="assessment.id">
+      <!-- Assessment items -->
+    </div>
+  </div>
+</template>
+```
+
+## Implementation Phases
+
+### Phase 1: Foundation (Week 1-2)
+1. Project Setup
+   - Initialize Nuxt project
+   - Configure TypeScript
+   - Set up Tailwind CSS
+   - Implement basic routing
+   - Set up development environment
+
+2. Authentication System
+   - User registration
+   - Login system
+   - JWT implementation
+   - Role-based middleware
+   - Protected routes
+
+3. Basic UI Framework
+   - Layout components
+   - Navigation
+   - Responsive design
+   - Theme implementation
+   - Component library
+
+### Phase 2: Core Features (Week 3-4)
+1. Course Management
+   - Course creation/editing
+   - Markdown support
+   - File upload system
+   - Resource management
+   - Course listing
+
+2. Assessment System
+   - Assessment creation
+   - Submission handling
+   - Grading interface
+   - File management
+   - Progress tracking
+
+3. Notice System
+   - Notice creation
+   - Categorization
+   - Scheduling
+   - Distribution
+   - Priority levels
+
+### Phase 3: Advanced Features (Week 5-6)
+1. Timetable Implementation
+   - Schedule management
+   - Room allocation
+   - Teacher assignment
+   - Calendar integration
+   - Conflict resolution
+
+2. Attendance System
+   - Attendance tracking
+   - Reporting
+   - Analytics
+   - Export functionality
+   - Statistics
+
+### Phase 4: Polish & Optimization (Week 7-8)
+1. Performance Optimization
+   - Code splitting
+   - Lazy loading
+   - Caching
+   - Database optimization
+   - Asset optimization
+
+2. Security Hardening
+   - Encryption implementation
+   - Security audits
+   - Penetration testing
+   - Backup systems
+   - Monitoring
+
+3. UI/UX Refinement
+   - Animation implementation
+   - Accessibility improvements
+   - Mobile optimization
+   - User feedback integration
+   - Error handling
+
+## Testing Strategy
+1. Unit Tests
+   - Component testing
+   - Utility function testing
+   - API endpoint testing
+   - Data validation testing
+
+2. Integration Tests
+   - User flows
+   - API integration
+   - Data persistence
+   - Authentication flows
+
+3. End-to-End Tests
+   - Critical user journeys
+   - Cross-browser testing
+   - Performance testing
+   - Security testing
+
+## Deployment Strategy
+1. Development
+   - Local development
+   - Hot reloading
+   - Debug tools
+   - Development database
+
+2. Staging
+   - Pre-production environment
+   - Integration testing
+   - Performance testing
+   - Security testing
+
+3. Production
+   - Production environment
+   - Monitoring
+   - Logging
+   - Backup systems
+   - SSL/TLS
+   - CDN integration
+
+## Monitoring and Maintenance
+1. Performance Monitoring
+   - Response times
+   - Error rates
+   - Resource usage
+   - User metrics
+
+2. Security Monitoring
+   - Failed login attempts
+   - Suspicious activity
+   - API usage
+   - Data access patterns
+
+3. Regular Maintenance
+   - Security updates
+   - Dependency updates
+   - Database optimization
+   - Backup verification
