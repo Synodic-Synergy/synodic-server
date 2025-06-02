@@ -12,14 +12,14 @@ export default defineNuxtConfig({
   ],
   app: {
     head: {
-      title: 'SAB - Student Advisory Body',
+      title: 'Synodic Synergy',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { 
           hid: 'description', 
           name: 'description', 
-          content: 'Student Advisory Body (SAB) - Empowering student voices across Catholic schools in South Australia' 
+          content: 'Synodic Synergy - Your school\'s integrated learning management system' 
         }
       ],
       link: [
