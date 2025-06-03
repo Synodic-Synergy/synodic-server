@@ -55,6 +55,12 @@ export default defineEventHandler(async (event: H3Event) => {
     .setExpirationTime('7d')
     .sign(secret);
 
+  // Set HTTP-only cookies
+  event.node.res.setHeader('Set-Cookie', [
+    `auth_token=${token}; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
+    `refresh_token=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`
+  ]);
+
   const response: AuthResponse = {
     user: {
       id: admin.id,
@@ -64,9 +70,7 @@ export default defineEventHandler(async (event: H3Event) => {
       lastName: admin.lastName,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt
-    },
-    token,
-    refreshToken
+    }
   };
 
   return response;

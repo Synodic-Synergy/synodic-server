@@ -3,46 +3,57 @@ import type { User } from '~/types/user';
 
 interface AuthState {
   user: Omit<User, 'password'> | null;
-  token: string | null;
-  refreshToken: string | null;
+  initialized: boolean;
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
-    token: null,
-    refreshToken: null
+    initialized: false
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.user,
     isAdmin: (state) => state.user?.role === 'admin',
     isStaff: (state) => state.user?.role === 'staff',
     isStudent: (state) => state.user?.role === 'student'
   },
 
   actions: {
-    setAuth(auth: { user: Omit<User, 'password'>; token: string; refreshToken: string }) {
+    setAuth(auth: { user: Omit<User, 'password'> }) {
       this.user = auth.user;
-      this.token = auth.token;
-      this.refreshToken = auth.refreshToken;
-
-      // Store in localStorage for persistence
-      localStorage.setItem('auth', JSON.stringify(auth));
     },
 
     clearAuth() {
       this.user = null;
-      this.token = null;
-      this.refreshToken = null;
-      localStorage.removeItem('auth');
     },
 
-    initialize() {
-      const stored = localStorage.getItem('auth');
-      if (stored) {
-        const auth = JSON.parse(stored);
-        this.setAuth(auth);
+    async initialize() {
+      if (this.initialized) {
+        console.log('[STORE] Already initialized');
+        return;
+      }
+
+      if (!process.client) {
+        console.log('[STORE] Skipping initialization on server');
+        return;
+      }
+      
+      try {
+        console.log('[STORE] Calling /api/auth/me...');
+        const response = await $fetch('/api/auth/me', {
+          onResponseError: (error) => {
+            console.error('[STORE] API Error:', error.response?.status, error.response?._data);
+          }
+        });
+        this.setAuth(response);
+        console.log('[STORE] User set:', response.user);
+      } catch (error: any) {
+        console.error('[STORE] Error during initialization:', error.message);
+        this.clearAuth();
+      } finally {
+        this.initialized = true;
+        console.log('[STORE] Initialization complete');
       }
     }
   }

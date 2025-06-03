@@ -10,7 +10,10 @@
             </NuxtLink>
           </div>
           <div class="flex items-center">
-            <template v-if="authStore.isAuthenticated">
+            <template v-if="!authStore.initialized">
+              <div class="animate-pulse h-6 w-24 bg-dark-border rounded"></div>
+            </template>
+            <template v-else-if="authStore.isAuthenticated">
               <span class="text-text-secondary mr-4">{{ authStore.user?.email }}</span>
               <button @click="handleLogout" class="btn-secondary">
                 Sign Out
@@ -33,14 +36,27 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
-const handleLogout = () => {
-  authStore.clearAuth();
-  router.push('/login');
+onMounted(async () => {
+  if (process.client) {
+    console.log('[LAYOUT] Initializing auth store...');
+    await authStore.initialize();
+  }
+});
+
+const handleLogout = async () => {
+  try {
+    await $fetch('/api/auth/logout');
+    authStore.clearAuth();
+    router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
 };
 </script> 

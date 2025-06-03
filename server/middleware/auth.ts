@@ -1,4 +1,4 @@
-import { defineEventHandler, getRequestHeader, createError } from 'h3';
+import { defineEventHandler, createError } from 'h3';
 import { jwtVerify } from 'jose';
 import type { UserRole } from '~/types/user';
 
@@ -8,40 +8,39 @@ export default defineEventHandler(async (event) => {
     '/api/auth/login',
     '/api/auth/register',
     '/api/auth/register-admin',
+    '/api/auth/me',
     '/',
     '/login',
     '/index',
     '/__nuxt_error'  // Add error page to public routes
   ];
   
-  // Log the current path for debugging
-  console.log('Current path:', event.path);
-  
   // Check if the current path is in public routes
   const isPublicRoute = publicRoutes.some(route => {
     const isMatch = event.path === route || 
                    event.path.startsWith(route + '/') ||
                    event.path.startsWith('/__nuxt');  // Allow all Nuxt internal routes
-    console.log(`Checking route ${route} against ${event.path}: ${isMatch}`);
     return isMatch;
   });
 
   if (isPublicRoute) {
-    console.log('Skipping auth for public route:', event.path);
     return;
   }
 
   // For API routes, require authentication
   if (event.path.startsWith('/api/')) {
-    const authHeader = getRequestHeader(event, 'authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const cookies = event.node.req.headers.cookie;
+    const token = cookies?.split(';')
+      .find((c: string) => c.trim().startsWith('auth_token='))
+      ?.split('=')[1];
+
+    if (!token) {
       throw createError({
         statusCode: 401,
         message: 'Unauthorized - No token provided'
       });
     }
 
-    const token = authHeader.split(' ')[1];
     try {
       const config = useRuntimeConfig();
       const secret = new TextEncoder().encode(config.jwtSecret);
