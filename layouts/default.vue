@@ -54,7 +54,7 @@ const handleLogout = async () => {
   try {
     await $fetch('/api/auth/logout');
     authStore.clearAuth();
-    router.push('/login');
+    await navigateTo('/login');
   } catch (error) {
     console.error('Logout failed:', error);
   }

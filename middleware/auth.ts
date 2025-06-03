@@ -23,9 +23,9 @@ export default defineNuxtRouteMiddleware((to) => {
     return;
   }
 
-  // Check for auth token in localStorage
-  const token = localStorage.getItem('auth_token');
-  if (!token) {
+  // Check for auth token in cookies
+  const cookie = useCookie('auth_token');
+  if (!cookie.value) {
     return navigateTo('/login');
   }
 }); 
