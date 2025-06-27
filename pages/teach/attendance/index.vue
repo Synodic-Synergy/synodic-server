@@ -3,28 +3,27 @@
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold text-text-primary">Attendance</h1>
     </div>
-    <div class="grid grid-cols-1 gap-8">
-      <div v-for="classItem in classes" :key="classItem.id"
+    <div v-if="attendanceStore.loading" class="flex justify-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+    </div>
+    <div v-else-if="attendanceStore.attendanceRecords.length === 0" class="text-center text-text-secondary py-8">
+      No attendance records found.
+    </div>
+    <div v-else class="grid grid-cols-1 gap-8">
+      <div v-for="record in attendanceStore.attendanceRecords" :key="record.id"
            class="bg-dark-secondary p-6 rounded-lg border border-dark-border">
         <div class="flex justify-between items-start mb-4">
           <div>
-            <h3 class="font-semibold text-text-primary">{{ classItem.courseTitle }}</h3>
-            <p class="text-text-secondary text-sm mt-1">{{ classItem.time }}</p>
+            <h3 class="font-semibold text-text-primary">{{ courseStore.courseById(record.courseId)?.title || 'N/A' }}</h3>
+            <p class="text-text-secondary text-sm mt-1">{{ formatDate(record.date) }}</p>
           </div>
-          <span class="text-text-secondary text-sm">{{ classItem.room }}</span>
+          <span class="text-text-secondary text-sm">Taken by: {{ record.takenBy }}</span>
         </div>
         <div class="space-y-4">
-          <div v-for="student in classItem.students" :key="student.id"
+          <div v-for="student in record.students" :key="student.studentId"
                class="flex items-center justify-between p-2 rounded bg-dark-primary">
-            <span class="text-text-primary">{{ student.name }}</span>
-            <div class="flex gap-2">
-              <button class="px-3 py-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30">
-                Present
-              </button>
-              <button class="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">
-                Absent
-              </button>
-            </div>
+            <span class="text-text-primary">{{ student.studentName }}</span>
+            <span class="text-text-secondary text-xs">Status: {{ student.status }}</span>
           </div>
         </div>
       </div>
@@ -33,20 +32,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted } from 'vue';
+import { useAttendanceStore } from '~/stores/attendanceStore';
+import { useCourseStore } from '~/stores/courseStore';
 
-interface Student {
-  id: string;
-  name: string;
-}
+definePageMeta({ layout: 'teach' });
 
-interface Class {
-  id: string;
-  courseTitle: string;
-  time: string;
-  room: string;
-  students: Student[];
-}
+const attendanceStore = useAttendanceStore();
+const courseStore = useCourseStore();
 
-const classes = ref<Class[]>([]);
+onMounted(() => {
+  attendanceStore.fetchTeachAttendance();
+});
+const formatDate = (date: Date | string) => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(date));
+};
 </script> 

@@ -52,7 +52,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '~/stores/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
@@ -61,6 +61,7 @@ const error = ref('');
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const handleSubmit = async () => {
   loading.value = true;
@@ -77,7 +78,21 @@ const handleSubmit = async () => {
 
     authStore.setAuth(response);
     
-    // Redirect based on role
+    // Check if there's a redirect parameter
+    const redirectPath = route.query.redirect as string;
+    
+    if (redirectPath) {
+      // Validate the redirect path to prevent open redirects
+      const allowedPaths = ['/learn', '/teach', '/admin'];
+      const isValidRedirect = allowedPaths.some(path => redirectPath.startsWith(path));
+      
+      if (isValidRedirect) {
+        router.push(redirectPath);
+        return;
+      }
+    }
+    
+    // Default redirect based on role
     if (authStore.isAdmin || authStore.isStaff) {
       router.push('/teach');
     } else {

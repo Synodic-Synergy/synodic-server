@@ -6,8 +6,14 @@
         New Notice
       </NuxtLink>
     </div>
-    <div class="grid grid-cols-1 gap-4">
-      <div v-for="notice in notices" :key="notice.id"
+    <div v-if="noticeStore.loading" class="flex justify-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+    </div>
+    <div v-else-if="noticeStore.notices.length === 0" class="text-center text-text-secondary py-8">
+      No notices found.
+    </div>
+    <div v-else class="grid grid-cols-1 gap-4">
+      <div v-for="notice in noticeStore.notices" :key="notice.id"
            class="bg-dark-secondary p-4 rounded-lg border border-dark-border">
         <div class="flex justify-between items-start">
           <div>
@@ -29,8 +35,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Notice } from '~/types/dashboard';
+import { onMounted } from 'vue';
+import { useNoticeStore } from '~/stores/noticeStore';
 
-const notices = ref<Notice[]>([]);
+definePageMeta({ layout: 'teach' });
+
+const noticeStore = useNoticeStore();
+
+onMounted(() => {
+  noticeStore.fetchTeachNotices();
+});
 </script> 

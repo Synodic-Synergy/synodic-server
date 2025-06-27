@@ -6,18 +6,22 @@
         New Assessment
       </NuxtLink>
     </div>
-    <div v-if="isLoading" class="flex justify-center">
+    <div v-if="assessmentStore.loading" class="flex justify-center">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
     </div>
+    <div v-else-if="assessmentStore.assessments.length === 0" class="text-center text-text-secondary py-8">
+      No assessments found.
+    </div>
     <div v-else class="grid grid-cols-1 gap-4">
-      <div v-for="assessment in assessments" :key="assessment.id"
+      <div v-for="assessment in assessmentStore.assessments" :key="assessment.id"
            class="bg-dark-secondary p-4 rounded-lg border border-dark-border">
         <div class="flex justify-between items-start">
           <div>
             <h3 class="font-semibold text-text-primary">{{ assessment.title }}</h3>
-            <p class="text-text-secondary text-sm mt-1">Due: {{ formatDate(assessment.dueDate) }}</p>
+            <p class="text-text-secondary text-sm mt-1">
+              Due: {{ formatDate(typeof assessment.dueDate === 'string' ? assessment.dueDate : assessment.dueDate.toISOString()) }}
+            </p>
           </div>
-          <span class="text-text-secondary text-sm">{{ assessment.submissionCount }} submissions</span>
         </div>
       </div>
     </div>
@@ -25,11 +29,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import type { Assessment } from '~/types/dashboard';
+import { onMounted } from 'vue';
+import { useAssessmentStore } from '~/stores/assessmentStore';
 
-const assessments = ref<Assessment[]>([]);
-const isLoading = ref(true);
+definePageMeta({ layout: 'teach' });
+
+const assessmentStore = useAssessmentStore();
+
+onMounted(() => {
+  assessmentStore.fetchTeachAssessments();
+});
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -38,15 +47,4 @@ const formatDate = (date: string) => {
     year: 'numeric'
   });
 };
-
-onMounted(async () => {
-  try {
-    const response = await $fetch<Assessment[]>('/api/teach/assessments');
-    assessments.value = response;
-  } catch (error) {
-    console.error('Failed to fetch assessments:', error);
-  } finally {
-    isLoading.value = false;
-  }
-});
 </script> 

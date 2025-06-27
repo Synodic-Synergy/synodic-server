@@ -1,6 +1,7 @@
 import { defineEventHandler, createError } from 'h3';
-import { jwtVerify } from 'jose';
 import type { UserRole } from '~/types/user';
+import { authService } from '~/utils/auth';
+import { sessionStore } from '~/utils/stores/sessionStore';
 
 export default defineEventHandler(async (event) => {
   // Skip auth for public routes and pages
@@ -8,18 +9,22 @@ export default defineEventHandler(async (event) => {
     '/api/auth/login',
     '/api/auth/register',
     '/api/auth/register-admin',
+    '/api/auth/refresh',
     '/api/auth/me',
+    '/api/auth/logout',
     '/',
     '/login',
     '/index',
-    '/__nuxt_error'  // Add error page to public routes
+    '/admin-setup',
+    '/__nuxt_error'
   ];
   
   // Check if the current path is in public routes
   const isPublicRoute = publicRoutes.some(route => {
     const isMatch = event.path === route || 
                    event.path.startsWith(route + '/') ||
-                   event.path.startsWith('/__nuxt');  // Allow all Nuxt internal routes
+                   event.path.startsWith('/__nuxt') ||
+                   event.path.startsWith('/_nuxt');
     return isMatch;
   });
 
@@ -29,32 +34,88 @@ export default defineEventHandler(async (event) => {
 
   // For API routes, require authentication
   if (event.path.startsWith('/api/')) {
-    const cookies = event.node.req.headers.cookie;
-    const token = cookies?.split(';')
-      .find((c: string) => c.trim().startsWith('auth_token='))
-      ?.split('=')[1];
-
-    if (!token) {
-      throw createError({
-        statusCode: 401,
-        message: 'Unauthorized - No token provided'
-      });
-    }
-
     try {
-      const config = useRuntimeConfig();
-      const secret = new TextEncoder().encode(config.jwtSecret);
-      const { payload } = await jwtVerify(token, secret);
-      
+      // Extract tokens from cookies
+      const { accessToken, refreshToken } = authService.extractTokensFromCookies(event);
+
+      if (!accessToken) {
+        throw createError({
+          statusCode: 401,
+          message: 'No access token provided'
+        });
+      }
+
+      // Verify access token
+      let authContext;
+      try {
+        authContext = await authService.verifyAccessToken(accessToken);
+      } catch (error) {
+        // If access token is invalid, try refresh token
+        if (refreshToken) {
+          try {
+            const refreshResult = await $fetch('/api/auth/refresh', {
+              method: 'POST',
+              body: { refreshToken }
+            });
+            
+            // Update cookies with new tokens
+            const newTokens = (refreshResult as any).tokens;
+            authService.setAuthCookies(event, newTokens);
+            
+            // Get auth context from new access token
+            authContext = await authService.verifyAccessToken(newTokens.accessToken);
+          } catch (refreshError) {
+            throw createError({
+              statusCode: 401,
+              message: 'Invalid or expired tokens'
+            });
+          }
+        } else {
+          throw createError({
+            statusCode: 401,
+            message: 'Invalid access token'
+          });
+        }
+      }
+
+      // TEMPORARILY DISABLED: Verify session is still active
+      // const session = await sessionStore.findBySessionId(authContext.sessionId);
+      // if (!session || !session.isActive) {
+      //   throw createError({
+      //     statusCode: 401,
+      //     message: 'Session is no longer active'
+      //   });
+      // }
+
+      // TEMPORARILY DISABLED: Check if session is expired
+      // if (session.expiresAt < new Date()) {
+      //   await sessionStore.deactivateSession(session.id);
+      //   throw createError({
+      //     statusCode: 401,
+      //     message: 'Session expired'
+      //   });
+      // }
+
       // Add user info to event context
       event.context.auth = {
-        userId: payload.sub,
-        role: payload.role as UserRole
+        userId: authContext.userId,
+        role: authContext.role,
+        sessionId: authContext.sessionId,
+        permissions: authContext.permissions
       };
-    } catch (error) {
+
+      // TEMPORARILY DISABLED: Update session activity
+      // await sessionStore.updateSessionActivity(authContext.sessionId);
+
+    } catch (error: any) {
+      if (error.statusCode) {
+        throw error;
+      }
+
+      console.error('Auth middleware error:', error);
       throw createError({
         statusCode: 401,
-        message: 'Unauthorized - Invalid token'
+        message: 'Authentication failed'
       });
     }
   }

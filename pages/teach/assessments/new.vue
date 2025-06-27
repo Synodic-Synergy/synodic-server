@@ -35,7 +35,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useAssessmentStore } from '~/stores/assessmentStore';
 
+definePageMeta({ layout: 'teach' });
+
+const assessmentStore = useAssessmentStore();
 const title = ref('');
 const description = ref('');
 const dueDate = ref('');
@@ -44,13 +48,10 @@ const isSubmitting = ref(false);
 const handleSubmit = async () => {
   try {
     isSubmitting.value = true;
-    await $fetch('/api/teach/assessments', {
-      method: 'POST',
-      body: {
-        title: title.value,
-        description: description.value,
-        dueDate: dueDate.value
-      }
+    await assessmentStore.createAssessment({
+      title: title.value,
+      description: description.value,
+      dueDate: new Date(dueDate.value)
     });
     await navigateTo('/teach/assessments');
   } catch (error) {
