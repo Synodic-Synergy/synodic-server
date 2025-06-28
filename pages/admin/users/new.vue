@@ -1,18 +1,18 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-dark-primary">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="bg-dark-secondary border-b border-dark-border">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center py-6">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Add New User</h1>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            <h1 class="text-3xl font-bold text-text-primary">Add New User</h1>
+            <p class="mt-1 text-sm text-text-secondary">
               Create a new user account
             </p>
           </div>
           <NuxtLink
             to="/admin/users"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center px-4 py-2 border border-dark-border text-sm font-medium rounded-md text-text-primary bg-dark-primary hover:bg-dark-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400"
           >
             Back to Users
           </NuxtLink>
@@ -22,16 +22,16 @@
 
     <!-- Main Content -->
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-lg font-medium text-gray-900 dark:text-white">User Information</h2>
+      <div class="bg-dark-secondary border border-dark-border rounded-lg">
+        <div class="px-6 py-4 border-b border-dark-border">
+          <h2 class="text-lg font-medium text-text-primary">User Information</h2>
         </div>
 
         <form @submit.prevent="createUser" class="p-6 space-y-6">
           <!-- Personal Information -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="firstName" class="block text-sm font-medium text-text-secondary mb-2">
                 First Name *
               </label>
               <input
@@ -39,13 +39,13 @@
                 v-model="form.firstName"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                 placeholder="Enter first name"
               />
             </div>
 
             <div>
-              <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="lastName" class="block text-sm font-medium text-text-secondary mb-2">
                 Last Name *
               </label>
               <input
@@ -53,14 +53,14 @@
                 v-model="form.lastName"
                 type="text"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                 placeholder="Enter last name"
               />
             </div>
           </div>
 
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label for="email" class="block text-sm font-medium text-text-secondary mb-2">
               Email Address *
             </label>
             <input
@@ -68,7 +68,7 @@
               v-model="form.email"
               type="email"
               required
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
               placeholder="Enter email address"
             />
           </div>
@@ -76,14 +76,14 @@
           <!-- Role and Status -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="role" class="block text-sm font-medium text-text-secondary mb-2">
                 Role *
               </label>
               <select
                 id="role"
                 v-model="form.role"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary"
               >
                 <option value="">Select a role</option>
                 <option value="admin">Administrator</option>
@@ -93,13 +93,13 @@
             </div>
 
             <div>
-              <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="status" class="block text-sm font-medium text-text-secondary mb-2">
                 Status
               </label>
               <select
                 id="status"
                 v-model="form.status"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -110,7 +110,7 @@
           <!-- Password -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="password" class="block text-sm font-medium text-text-secondary mb-2">
                 Password *
               </label>
               <input
@@ -118,16 +118,16 @@
                 v-model="form.password"
                 type="password"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                 placeholder="Enter password"
               />
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <p class="mt-1 text-xs text-text-secondary">
                 Minimum 8 characters with uppercase, lowercase, number, and special character
               </p>
             </div>
 
             <div>
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label for="confirmPassword" class="block text-sm font-medium text-text-secondary mb-2">
                 Confirm Password *
               </label>
               <input
@@ -135,7 +135,7 @@
                 v-model="form.confirmPassword"
                 type="password"
                 required
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                 placeholder="Confirm password"
               />
             </div>
@@ -143,29 +143,29 @@
 
           <!-- Additional Information -->
           <div v-if="form.role === 'student'">
-            <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">Student Information</h3>
+            <h3 class="text-md font-medium text-text-primary mb-4">Student Information</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label for="studentId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="studentId" class="block text-sm font-medium text-text-secondary mb-2">
                   Student ID
                 </label>
                 <input
                   id="studentId"
                   v-model="form.studentId"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                   placeholder="Enter student ID"
                 />
               </div>
 
               <div>
-                <label for="grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="grade" class="block text-sm font-medium text-text-secondary mb-2">
                   Grade Level
                 </label>
                 <select
                   id="grade"
                   v-model="form.grade"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary"
                 >
                   <option value="">Select grade</option>
                   <option value="9">Grade 9</option>
@@ -178,30 +178,30 @@
           </div>
 
           <div v-if="form.role === 'staff'">
-            <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">Staff Information</h3>
+            <h3 class="text-md font-medium text-text-primary mb-4">Staff Information</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="department" class="block text-sm font-medium text-text-secondary mb-2">
                   Department
                 </label>
                 <input
                   id="department"
                   v-model="form.department"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                   placeholder="Enter department"
                 />
               </div>
 
               <div>
-                <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="position" class="block text-sm font-medium text-text-secondary mb-2">
                   Position
                 </label>
                 <input
                   id="position"
                   v-model="form.position"
                   type="text"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  class="w-full px-3 py-2 border border-dark-border rounded-md focus:ring-orange-500 focus:border-orange-500 bg-dark-primary text-text-primary placeholder-text-secondary"
                   placeholder="Enter position"
                 />
               </div>
@@ -209,7 +209,7 @@
           </div>
 
           <!-- Error Messages -->
-          <div v-if="errors.length > 0" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
+          <div v-if="errors.length > 0" class="bg-red-900/20 border border-red-800 rounded-md p-4">
             <div class="flex">
               <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,10 +217,10 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                <h3 class="text-sm font-medium text-red-200">
                   There were errors with your submission
                 </h3>
-                <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                <div class="mt-2 text-sm text-red-300">
                   <ul class="list-disc pl-5 space-y-1">
                     <li v-for="error in errors" :key="error">{{ error }}</li>
                   </ul>
@@ -230,7 +230,7 @@
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-4">
+          <div v-if="success" class="bg-green-900/20 border border-green-800 rounded-md p-4">
             <div class="flex">
               <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -238,10 +238,10 @@
                 </svg>
               </div>
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-green-800 dark:text-green-200">
+                <h3 class="text-sm font-medium text-green-200">
                   User created successfully!
                 </h3>
-                <div class="mt-2 text-sm text-green-700 dark:text-green-300">
+                <div class="mt-2 text-sm text-green-300">
                   <p>The user account has been created and is ready to use.</p>
                 </div>
               </div>
@@ -252,14 +252,14 @@
           <div class="flex justify-end space-x-4">
             <NuxtLink
               to="/admin/users"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="px-4 py-2 border border-dark-border text-sm font-medium rounded-md text-text-primary bg-dark-primary hover:bg-dark-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400"
             >
               Cancel
             </NuxtLink>
             <button
               type="submit"
               :disabled="loading"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
