@@ -178,7 +178,7 @@ const attendanceStore = useAttendanceStore();
 const courseStore = useCourseStore();
 
 onMounted(() => {
-  attendanceStore.fetchAttendance();
+  attendanceStore.fetchAttendanceRecords();
 });
 
 const formatDate = (date: Date | string) => {

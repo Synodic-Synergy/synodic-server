@@ -3,13 +3,13 @@ import { userStore } from '~/utils/stores/userStore';
 import { courseStore } from '~/utils/stores/courseStore';
 import { assessmentStore } from '~/utils/stores/assessmentStore';
 import { noticeStore } from '~/utils/stores/noticeStore';
-import { attendanceStore } from '~/utils/stores/attendanceStore';
+import { attendanceRecordStore } from '~/utils/stores/attendanceStore';
 import { authService } from '~/utils/auth';
 import type { User, UserRole } from '~/types/user';
 import type { Course } from '~/types/course';
 import type { Assessment } from '~/types/assessment';
 import type { Notice } from '~/types/notice';
-import type { Attendance } from '~/types/attendance';
+import type { Attendance, AttendanceRecord } from '~/types/attendance';
 
 async function initializeData() {
   console.log('Initializing sample data...');
@@ -259,29 +259,33 @@ async function initializeData() {
   console.log('Created notices');
 
   // Create attendance records
-  const attendance1: Attendance = {
-    id: crypto.randomUUID(),
+  const attendanceRecord1: Omit<AttendanceRecord, 'id'> = {
     courseId: course1.id,
+    studentId: students[0].id,
+    studentName: `${students[0].firstName} ${students[0].lastName}`,
+    teacherId: staff1.id,
+    teacherName: `${staff1.firstName} ${staff1.lastName}`,
     date: new Date(),
-    students: [
-      {
-        studentId: students[0].id,
-        studentName: `${students[0].firstName} ${students[0].lastName}`,
-        status: 'present',
-        notes: ''
-      },
-      {
-        studentId: students[1].id,
-        studentName: `${students[1].firstName} ${students[1].lastName}`,
-        status: 'late',
-        notes: 'Arrived 5 minutes late'
-      }
-    ],
-    takenBy: staff1.id,
-    takenAt: new Date(),
-    notes: 'Good attendance overall'
+    status: 'present',
+    notes: '',
+    createdAt: new Date(),
+    updatedAt: new Date()
   };
-  await attendanceStore.create(attendance1);
+  await attendanceRecordStore.create(attendanceRecord1);
+
+  const attendanceRecord2: Omit<AttendanceRecord, 'id'> = {
+    courseId: course1.id,
+    studentId: students[1].id,
+    studentName: `${students[1].firstName} ${students[1].lastName}`,
+    teacherId: staff1.id,
+    teacherName: `${staff1.firstName} ${staff1.lastName}`,
+    date: new Date(),
+    status: 'late',
+    notes: 'Arrived 5 minutes late',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  await attendanceRecordStore.create(attendanceRecord2);
   console.log('Created attendance records');
 
   console.log('Sample data initialization complete!');

@@ -9,12 +9,44 @@ export interface Attendance {
 }
 
 export interface AttendanceRecord {
+  id: string;
+  courseId: string;
+  lessonId?: string;
   studentId: string;
   studentName: string;
-  status: 'present' | 'absent' | 'late' | 'excused' | 'tardy';
-  timeIn?: Date;
-  timeOut?: Date;
+  teacherId: string;
+  teacherName: string;
+  date: Date;
+  status: 'present' | 'absent' | 'late' | 'excused';
   notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AttendanceSession {
+  id: string;
+  courseId: string;
+  lessonId?: string;
+  teacherId: string;
+  date: Date;
+  startTime: string;
+  endTime?: string;
+  isActive: boolean;
+  records: AttendanceRecord[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface AttendanceStats {
+  courseId: string;
+  studentId: string;
+  totalSessions: number;
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
+  excusedCount: number;
+  attendanceRate: number; // percentage
+  lastAttendance: Date;
 }
 
 export interface AttendanceReport {

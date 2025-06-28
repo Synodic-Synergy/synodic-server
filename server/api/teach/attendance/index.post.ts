@@ -1,9 +1,9 @@
 import { defineEventHandler, readBody, createError } from 'h3';
-import { attendanceStore } from '~/utils/stores/attendanceStore';
+import { attendanceRecordStore } from '~/utils/stores/attendanceStore';
 import { courseStore } from '~/utils/stores/courseStore';
 import { userStore } from '~/utils/stores/userStore';
 import { authService } from '~/utils/auth';
-import type { Attendance, AttendanceRecord } from '~/types/attendance';
+import type { AttendanceRecord } from '~/types/attendance';
 
 interface CreateAttendanceRequest {
   courseId: string;
@@ -11,7 +11,7 @@ interface CreateAttendanceRequest {
   students: {
     studentId: string;
     studentName: string;
-    status: 'present' | 'absent' | 'late' | 'excused' | 'tardy';
+    status: 'present' | 'absent' | 'late' | 'excused';
     notes?: string;
   }[];
   notes?: string;
@@ -91,7 +91,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Validate attendance status
-    const validStatuses = ['present', 'absent', 'late', 'excused', 'tardy'];
+    const validStatuses = ['present', 'absent', 'late', 'excused'];
     for (const student of students) {
       if (!validStatuses.includes(student.status)) {
         throw createError({
@@ -101,32 +101,37 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const attendance: Attendance = {
-      id: crypto.randomUUID(),
-      courseId,
-      date: dateObj,
-      students: students.map(student => ({
+    // Create individual attendance records for each student
+    const createdRecords: AttendanceRecord[] = [];
+    
+    for (const student of students) {
+      const attendanceRecord: Omit<AttendanceRecord, 'id'> = {
+        courseId,
         studentId: student.studentId,
         studentName: student.studentName,
+        teacherId: user.id,
+        teacherName: `${user.firstName} ${user.lastName}`,
+        date: dateObj,
         status: student.status,
-        notes: student.notes
-      })),
-      takenBy: user.id,
-      takenAt: new Date(),
-      notes
-    };
+        notes: student.notes || '',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-    const createdAttendance = await attendanceStore.create(attendance);
+      const createdRecord = await attendanceRecordStore.create(attendanceRecord);
+      createdRecords.push(createdRecord);
+    }
 
     return {
       success: true,
-      data: createdAttendance
+      data: createdRecords,
+      message: `Created ${createdRecords.length} attendance records`
     };
   } catch (error: any) {
-    console.error('Error creating attendance record:', error);
+    console.error('Error creating attendance records:', error);
     throw createError({
       statusCode: 500,
-      message: 'Failed to create attendance record'
+      message: 'Failed to create attendance records'
     });
   }
 }); 

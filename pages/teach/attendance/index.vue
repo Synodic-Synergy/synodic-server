@@ -44,7 +44,7 @@
 
       <!-- Empty State -->
       <MotionCard 
-        v-else-if="attendanceStore.attendanceRecords.length === 0" 
+        v-else-if="sessions.length === 0" 
         class="text-center py-16 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-xl border border-gray-600/30"
         :initial="{ opacity: 0, scale: 0.9 }"
         :enter="{ opacity: 1, scale: 1 }"
@@ -56,9 +56,9 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 class="text-2xl font-bold text-white mb-2">No attendance records</h3>
+          <h3 class="text-2xl font-bold text-white mb-2">No attendance sessions</h3>
           <p class="text-gray-300 text-lg max-w-md mx-auto">
-            Attendance records will appear here when you start tracking
+            Attendance sessions will appear here when you start tracking
           </p>
         </div>
         <MotionButton 
@@ -73,11 +73,11 @@
         </MotionButton>
       </MotionCard>
 
-      <!-- Attendance Records -->
+      <!-- Attendance Sessions -->
       <div v-else class="space-y-8">
         <MotionCard 
-          v-for="(record, index) in attendanceStore.attendanceRecords" 
-          :key="record.id"
+          v-for="(session, index) in sessions" 
+          :key="session.id"
           class="bg-gradient-to-br from-gray-800/50 to-gray-700/50 backdrop-blur-xl border border-gray-600/30 hover:border-amber-500/50 transition-all duration-300 group"
           :initial="{ opacity: 0, y: 50, scale: 0.9 }"
           :enter="{ opacity: 1, y: 0, scale: 1 }"
@@ -95,16 +95,16 @@
                 </div>
                 <div>
                   <h3 class="text-xl font-bold text-white group-hover:text-amber-400 transition-colors duration-300">
-                    {{ courseStore.courseById(record.courseId)?.title || 'N/A' }}
+                    {{ getCourseName(session.courseId) }}
                   </h3>
                   <p class="text-gray-300 text-sm">
-                    {{ formatDate(record.date) }}
+                    {{ formatDate(session.date) }}
                   </p>
                 </div>
               </div>
               <div class="text-right">
-                <span class="text-gray-400 text-sm">Taken by:</span>
-                <p class="text-white font-semibold">{{ record.takenBy }}</p>
+                <span class="text-gray-400 text-sm">Taught by:</span>
+                <p class="text-white font-semibold">{{ getTeacherName(session.teacherId) }}</p>
               </div>
             </div>
 
@@ -114,7 +114,7 @@
                 <div class="flex items-center justify-between">
                   <span class="text-green-400 text-sm font-medium">Present</span>
                   <span class="text-green-400 text-lg font-bold">
-                    {{ record.students.filter(s => s.status === 'present').length }}
+                    {{ session.records.filter(r => r.status === 'present').length }}
                   </span>
                 </div>
               </div>
@@ -122,7 +122,7 @@
                 <div class="flex items-center justify-between">
                   <span class="text-red-400 text-sm font-medium">Absent</span>
                   <span class="text-red-400 text-lg font-bold">
-                    {{ record.students.filter(s => s.status === 'absent').length }}
+                    {{ session.records.filter(r => r.status === 'absent').length }}
                   </span>
                 </div>
               </div>
@@ -130,7 +130,7 @@
                 <div class="flex items-center justify-between">
                   <span class="text-yellow-400 text-sm font-medium">Late</span>
                   <span class="text-yellow-400 text-lg font-bold">
-                    {{ record.students.filter(s => s.status === 'late').length }}
+                    {{ session.records.filter(r => r.status === 'late').length }}
                   </span>
                 </div>
               </div>
@@ -140,25 +140,25 @@
             <div class="space-y-3">
               <h4 class="text-lg font-semibold text-white mb-4">Student Attendance</h4>
               <div 
-                v-for="student in record.students" 
-                :key="student.studentId"
+                v-for="record in session.records" 
+                :key="record.id"
                 class="flex items-center justify-between p-4 rounded-lg bg-gray-700/30 border border-gray-600/30 hover:border-amber-500/30 transition-all duration-300"
               >
                 <div class="flex items-center">
                   <div class="w-8 h-8 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center mr-3">
                     <span class="text-white text-sm font-semibold">
-                      {{ student.studentName.charAt(0).toUpperCase() }}
+                      {{ record.studentName.charAt(0).toUpperCase() }}
                     </span>
                   </div>
-                  <span class="text-white font-medium">{{ student.studentName }}</span>
+                  <span class="text-white font-medium">{{ record.studentName }}</span>
                 </div>
                 <span :class="[
                   'px-3 py-1 rounded-full text-xs font-semibold',
-                  student.status === 'present' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                  student.status === 'absent' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                  record.status === 'present' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                  record.status === 'absent' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
                   'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                 ]">
-                  {{ student.status }}
+                  {{ record.status }}
                 </span>
               </div>
             </div>
@@ -188,25 +188,33 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import { useAttendanceStore } from '~/stores/attendanceStore';
 import { useCourseStore } from '~/stores/courseStore';
+import { useUserStore } from '~/stores/userStore';
 
 definePageMeta({ layout: 'teach' });
 
 const attendanceStore = useAttendanceStore();
 const courseStore = useCourseStore();
+const userStore = useUserStore();
 
 onMounted(() => {
-  attendanceStore.fetchTeachAttendance();
+  attendanceStore.fetchAttendanceSessions();
+  courseStore.fetchCourses();
+  userStore.fetchUsers();
 });
 
-const formatDate = (date: Date | string) => {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(date));
+const sessions = computed(() => attendanceStore.attendanceSessions);
+const getCourseName = (courseId: string) => courseStore.courseById(courseId)?.title || 'N/A';
+const getTeacherName = (teacherId: string) => {
+  const teacher = userStore.userById(teacherId);
+  return teacher ? `${teacher.firstName} ${teacher.lastName}` : 'N/A';
+};
+const formatDate = (date: Date | string | null | undefined) => {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'N/A';
+  return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(d);
 };
 </script> 

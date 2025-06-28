@@ -131,6 +131,26 @@ export const useCourseStore = defineStore('course', {
 
     clearError() {
       this.error = null;
+    },
+
+    async fetchCourse(id: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await $fetch<ApiResponse<Course>>(`/api/courses/${id}`);
+        if (response.success) {
+          this.currentCourse = response.data;
+          return response.data;
+        } else {
+          throw new Error('Failed to fetch course');
+        }
+      } catch (error: any) {
+        this.error = error.message || 'Failed to fetch course';
+        console.error('Error fetching course:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     }
   }
 }); 

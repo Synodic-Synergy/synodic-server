@@ -1,154 +1,102 @@
 import { Store } from '../store';
-import type { Attendance, AttendanceReport } from '~/types/attendance';
+import type { AttendanceRecord, AttendanceSession, AttendanceStats } from '~/types/attendance';
 
-class AttendanceStore extends Store<Attendance> {
+class AttendanceRecordStore extends Store<AttendanceRecord> {
   constructor() {
-    super('attendance');
+    super('attendance-records');
   }
 
-  async findByCourse(courseId: string): Promise<Attendance[]> {
-    return this.find({ courseId });
+  async findByCourse(courseId: string): Promise<AttendanceRecord[]> {
+    const records = await this.find({});
+    return records.filter((record: AttendanceRecord) => record.courseId === courseId);
   }
 
-  async findByDate(courseId: string, date: Date): Promise<Attendance | null> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const allAttendance = await this.find({ courseId });
-    
-    return allAttendance.find(record => {
-      const recordDate = new Date(record.date);
-      return recordDate >= startOfDay && recordDate <= endOfDay;
-    }) || null;
+  async findByStudent(studentId: string): Promise<AttendanceRecord[]> {
+    const records = await this.find({});
+    return records.filter((record: AttendanceRecord) => record.studentId === studentId);
   }
 
-  async findByStudent(studentId: string, courseId?: string): Promise<Attendance[]> {
-    const attendance = await this.find({});
-    
-    return attendance.filter(record => {
-      if (courseId && record.courseId !== courseId) return false;
-      return record.students.some(student => student.studentId === studentId);
-    });
+  async findByDate(date: Date): Promise<AttendanceRecord[]> {
+    const records = await this.find({});
+    const targetDate = date.toDateString();
+    return records.filter((record: AttendanceRecord) => new Date(record.date).toDateString() === targetDate);
   }
 
-  async getStudentAttendance(studentId: string, courseId: string): Promise<{
-    totalSessions: number;
-    present: number;
-    absent: number;
-    late: number;
-    excused: number;
-    tardy: number;
-    attendanceRate: number;
-  }> {
-    const attendance = await this.findByStudent(studentId, courseId);
+  async findByCourseAndDate(courseId: string, date: Date): Promise<AttendanceRecord[]> {
+    const records = await this.findByCourse(courseId);
+    const targetDate = date.toDateString();
+    return records.filter((record: AttendanceRecord) => new Date(record.date).toDateString() === targetDate);
+  }
+
+  async getStudentAttendanceStats(courseId: string, studentId: string): Promise<AttendanceStats> {
+    const records = await this.findByCourse(courseId);
+    const studentRecords = records.filter((record: AttendanceRecord) => record.studentId === studentId);
     
-    let totalSessions = 0;
-    let present = 0;
-    let absent = 0;
-    let late = 0;
-    let excused = 0;
-    let tardy = 0;
-
-    attendance.forEach(record => {
-      const studentRecord = record.students.find(s => s.studentId === studentId);
-      if (studentRecord) {
-        totalSessions++;
-        switch (studentRecord.status) {
-          case 'present':
-            present++;
-            break;
-          case 'absent':
-            absent++;
-            break;
-          case 'late':
-            late++;
-            break;
-          case 'excused':
-            excused++;
-            break;
-          case 'tardy':
-            tardy++;
-            break;
-        }
-      }
-    });
-
-    const attendanceRate = totalSessions > 0 ? ((present + excused) / totalSessions) * 100 : 0;
+    const totalSessions = studentRecords.length;
+    const presentCount = studentRecords.filter((r: AttendanceRecord) => r.status === 'present').length;
+    const absentCount = studentRecords.filter((r: AttendanceRecord) => r.status === 'absent').length;
+    const lateCount = studentRecords.filter((r: AttendanceRecord) => r.status === 'late').length;
+    const excusedCount = studentRecords.filter((r: AttendanceRecord) => r.status === 'excused').length;
+    
+    const attendanceRate = totalSessions > 0 ? (presentCount / totalSessions) * 100 : 0;
+    const lastAttendance = studentRecords.length > 0 
+      ? new Date(Math.max(...studentRecords.map((r: AttendanceRecord) => new Date(r.date).getTime())))
+      : new Date();
 
     return {
+      courseId,
+      studentId,
       totalSessions,
-      present,
-      absent,
-      late,
-      excused,
-      tardy,
-      attendanceRate
+      presentCount,
+      absentCount,
+      lateCount,
+      excusedCount,
+      attendanceRate,
+      lastAttendance
     };
-  }
-
-  async getCourseAttendanceReport(courseId: string): Promise<AttendanceReport[]> {
-    const attendance = await this.findByCourse(courseId);
-    const studentStats = new Map<string, AttendanceReport>();
-
-    // Initialize student stats
-    attendance.forEach(record => {
-      record.students.forEach(student => {
-        if (!studentStats.has(student.studentId)) {
-          studentStats.set(student.studentId, {
-            studentId: student.studentId,
-            studentName: student.studentName,
-            courseId,
-            courseName: '', // TODO: Get from course store
-            totalSessions: 0,
-            present: 0,
-            absent: 0,
-            late: 0,
-            excused: 0,
-            tardy: 0,
-            attendanceRate: 0,
-            lastAttendance: undefined
-          });
-        }
-
-        const stats = studentStats.get(student.studentId)!;
-        stats.totalSessions++;
-        
-        switch (student.status) {
-          case 'present':
-            stats.present++;
-            break;
-          case 'absent':
-            stats.absent++;
-            break;
-          case 'late':
-            stats.late++;
-            break;
-          case 'excused':
-            stats.excused++;
-            break;
-          case 'tardy':
-            stats.tardy++;
-            break;
-        }
-
-        if (student.timeIn && (!stats.lastAttendance || student.timeIn > stats.lastAttendance)) {
-          stats.lastAttendance = student.timeIn;
-        }
-      });
-    });
-
-    // Calculate attendance rates
-    studentStats.forEach(stats => {
-      stats.attendanceRate = stats.totalSessions > 0 
-        ? ((stats.present + stats.excused) / stats.totalSessions) * 100 
-        : 0;
-    });
-
-    return Array.from(studentStats.values());
   }
 }
 
-export const attendanceStore = new AttendanceStore(); 
+class AttendanceSessionStore extends Store<AttendanceSession> {
+  constructor() {
+    super('attendance-sessions');
+  }
+
+  async findByCourse(courseId: string): Promise<AttendanceSession[]> {
+    const sessions = await this.find({});
+    return sessions.filter((session: AttendanceSession) => session.courseId === courseId);
+  }
+
+  async findByTeacher(teacherId: string): Promise<AttendanceSession[]> {
+    const sessions = await this.find({});
+    return sessions.filter((session: AttendanceSession) => session.teacherId === teacherId);
+  }
+
+  async getActiveSession(courseId: string): Promise<AttendanceSession | null> {
+    const sessions = await this.findByCourse(courseId);
+    return sessions.find((session: AttendanceSession) => session.isActive) || null;
+  }
+
+  async endSession(sessionId: string): Promise<AttendanceSession> {
+    const session = await this.findOne({ id: sessionId });
+    if (!session) {
+      throw new Error('Session not found');
+    }
+    
+    const updatedSession: AttendanceSession = {
+      ...session,
+      isActive: false,
+      endTime: new Date().toISOString(),
+      updatedAt: new Date()
+    };
+    
+    const result = await this.update(sessionId, updatedSession);
+    if (!result) {
+      throw new Error('Failed to end attendance session');
+    }
+    return result;
+  }
+}
+
+export const attendanceRecordStore = new AttendanceRecordStore();
+export const attendanceSessionStore = new AttendanceSessionStore(); 

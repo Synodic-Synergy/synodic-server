@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
-import type { Attendance, AttendanceRecord } from '~/types/attendance';
+import type { AttendanceRecord, AttendanceSession, AttendanceStats } from '~/types/attendance';
 
 interface AttendanceState {
-  attendanceRecords: Attendance[];
+  attendanceRecords: AttendanceRecord[];
+  attendanceSessions: AttendanceSession[];
+  currentSession: AttendanceSession | null;
   loading: boolean;
   error: string | null;
-  currentRecord: Attendance | null;
 }
 
 interface ApiResponse<T> {
@@ -17,97 +18,121 @@ interface ApiResponse<T> {
 export const useAttendanceStore = defineStore('attendance', {
   state: (): AttendanceState => ({
     attendanceRecords: [],
+    attendanceSessions: [],
+    currentSession: null,
     loading: false,
-    error: null,
-    currentRecord: null
+    error: null
   }),
 
   getters: {
-    attendanceByCourse: (state) => (courseId: string) => 
+    recordsByCourse: (state) => (courseId: string) => 
       state.attendanceRecords.filter(record => record.courseId === courseId),
-    attendanceByDate: (state) => (date: Date) => 
-      state.attendanceRecords.filter(record => 
-        record.date.toDateString() === date.toDateString()
-      ),
-    recentAttendance: (state) => {
-      const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return state.attendanceRecords.filter(record => record.date >= oneWeekAgo);
-    }
+    recordsByStudent: (state) => (studentId: string) => 
+      state.attendanceRecords.filter(record => record.studentId === studentId),
+    sessionsByCourse: (state) => (courseId: string) => 
+      state.attendanceSessions.filter(session => session.courseId === courseId),
+    activeSessions: (state) => 
+      state.attendanceSessions.filter(session => session.isActive)
   },
 
   actions: {
-    async fetchAttendance() {
+    async fetchAttendanceRecords() {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await $fetch<ApiResponse<Attendance[]>>('/api/attendance');
+        const response = await $fetch<ApiResponse<AttendanceRecord[]>>('/api/attendance/records');
         if (response.success) {
           this.attendanceRecords = response.data;
         } else {
-          throw new Error('Failed to fetch attendance');
+          throw new Error('Failed to fetch attendance records');
         }
       } catch (error: any) {
-        this.error = error.message || 'Failed to fetch attendance';
-        console.error('Error fetching attendance:', error);
+        this.error = error.message || 'Failed to fetch attendance records';
+        console.error('Error fetching attendance records:', error);
       } finally {
         this.loading = false;
       }
     },
 
-    async fetchTeachAttendance() {
+    async fetchAttendanceSessions() {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await $fetch<ApiResponse<Attendance[]>>('/api/teach/attendance');
+        const response = await $fetch<ApiResponse<AttendanceSession[]>>('/api/attendance/sessions');
         if (response.success) {
-          this.attendanceRecords = response.data;
+          this.attendanceSessions = response.data;
         } else {
-          throw new Error('Failed to fetch attendance');
+          throw new Error('Failed to fetch attendance sessions');
         }
       } catch (error: any) {
-        this.error = error.message || 'Failed to fetch attendance';
-        console.error('Error fetching teach attendance:', error);
+        this.error = error.message || 'Failed to fetch attendance sessions';
+        console.error('Error fetching attendance sessions:', error);
       } finally {
         this.loading = false;
       }
     },
 
-    async createAttendance(attendanceData: Partial<Attendance>) {
+    async createAttendanceSession(sessionData: Partial<AttendanceSession>) {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await $fetch<ApiResponse<Attendance>>('/api/teach/attendance', {
+        const response = await $fetch<ApiResponse<AttendanceSession>>('/api/attendance/sessions', {
           method: 'POST',
-          body: attendanceData
+          body: sessionData
         });
         
         if (response.success) {
-          this.attendanceRecords.push(response.data);
+          this.attendanceSessions.push(response.data);
+          this.currentSession = response.data;
           return response.data;
         } else {
-          throw new Error('Failed to create attendance record');
+          throw new Error('Failed to create attendance session');
         }
       } catch (error: any) {
-        this.error = error.message || 'Failed to create attendance record';
-        console.error('Error creating attendance record:', error);
+        this.error = error.message || 'Failed to create attendance session';
+        console.error('Error creating attendance session:', error);
         throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    async updateAttendance(id: string, attendanceData: Partial<Attendance>) {
+    async markAttendance(recordData: Partial<AttendanceRecord>) {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await $fetch<ApiResponse<Attendance>>(`/api/teach/attendance/${id}`, {
+        const response = await $fetch<ApiResponse<AttendanceRecord>>('/api/attendance/records', {
+          method: 'POST',
+          body: recordData
+        });
+        
+        if (response.success) {
+          this.attendanceRecords.push(response.data);
+          return response.data;
+        } else {
+          throw new Error('Failed to mark attendance');
+        }
+      } catch (error: any) {
+        this.error = error.message || 'Failed to mark attendance';
+        console.error('Error marking attendance:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async updateAttendanceRecord(id: string, recordData: Partial<AttendanceRecord>) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await $fetch<ApiResponse<AttendanceRecord>>(`/api/attendance/records/${id}`, {
           method: 'PUT',
-          body: attendanceData
+          body: recordData
         });
         
         if (response.success) {
@@ -128,31 +153,58 @@ export const useAttendanceStore = defineStore('attendance', {
       }
     },
 
-    async deleteAttendance(id: string) {
+    async endAttendanceSession(sessionId: string) {
       this.loading = true;
       this.error = null;
       
       try {
-        const response = await $fetch<ApiResponse<void>>(`/api/teach/attendance/${id}`, {
-          method: 'DELETE'
+        const response = await $fetch<ApiResponse<AttendanceSession>>(`/api/attendance/sessions/${sessionId}/end`, {
+          method: 'PUT'
         });
         
         if (response.success) {
-          this.attendanceRecords = this.attendanceRecords.filter(record => record.id !== id);
+          const index = this.attendanceSessions.findIndex(session => session.id === sessionId);
+          if (index !== -1) {
+            this.attendanceSessions[index] = response.data;
+          }
+          if (this.currentSession?.id === sessionId) {
+            this.currentSession = response.data;
+          }
+          return response.data;
         } else {
-          throw new Error('Failed to delete attendance record');
+          throw new Error('Failed to end attendance session');
         }
       } catch (error: any) {
-        this.error = error.message || 'Failed to delete attendance record';
-        console.error('Error deleting attendance record:', error);
+        this.error = error.message || 'Failed to end attendance session';
+        console.error('Error ending attendance session:', error);
         throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    setCurrentRecord(record: Attendance | null) {
-      this.currentRecord = record;
+    async getAttendanceStats(courseId: string, studentId: string) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await $fetch<ApiResponse<AttendanceStats>>(`/api/attendance/stats/${courseId}/${studentId}`);
+        if (response.success) {
+          return response.data;
+        } else {
+          throw new Error('Failed to fetch attendance stats');
+        }
+      } catch (error: any) {
+        this.error = error.message || 'Failed to fetch attendance stats';
+        console.error('Error fetching attendance stats:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    setCurrentSession(session: AttendanceSession | null) {
+      this.currentSession = session;
     },
 
     clearError() {

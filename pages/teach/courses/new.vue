@@ -88,9 +88,9 @@
                 </label>
                 <select 
                   id="category"
+                  v-model="category"
                   class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                 >
-                  <option value="">Select a category</option>
                   <option value="mathematics">Mathematics</option>
                   <option value="science">Science</option>
                   <option value="literature">Literature</option>
@@ -105,14 +105,30 @@
                 </label>
                 <select 
                   id="level"
+                  v-model="level"
                   class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                 >
-                  <option value="">Select difficulty</option>
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
                   <option value="advanced">Advanced</option>
                 </select>
               </div>
+            </div>
+
+            <!-- Max Students Field -->
+            <div class="space-y-3">
+              <label for="maxStudents" class="block text-lg font-semibold text-white">
+                Maximum Students
+              </label>
+              <input
+                type="number"
+                id="maxStudents"
+                v-model="maxStudents"
+                min="1"
+                required
+                placeholder="Enter maximum number of students..."
+                class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+              >
             </div>
 
             <!-- Action Buttons -->
@@ -155,6 +171,9 @@ definePageMeta({ layout: 'teach' });
 const courseStore = useCourseStore();
 const title = ref('');
 const description = ref('');
+const category = ref('mathematics');
+const level = ref<'beginner' | 'intermediate' | 'advanced'>('beginner');
+const maxStudents = ref<number>(30);
 const isSubmitting = ref(false);
 
 const handleSubmit = async () => {
@@ -162,7 +181,10 @@ const handleSubmit = async () => {
     isSubmitting.value = true;
     await courseStore.createCourse({
       title: title.value,
-      description: description.value
+      description: description.value,
+      category: category.value,
+      level: level.value,
+      maxStudents: maxStudents.value
     });
     await navigateTo('/teach/courses');
   } catch (error) {
