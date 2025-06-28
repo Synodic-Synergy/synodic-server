@@ -305,13 +305,15 @@ const paginatedUsers = computed(() => {
 const loading = computed(() => adminStore.loading);
 
 // Methods
-const formatDate = (date: Date | null) => {
-  if (!date) return 'Never';
+const formatDate = (date: Date | string | null | undefined) => {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'N/A';
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
-  }).format(date);
+  }).format(d);
 };
 
 const editUser = (user: any) => {
