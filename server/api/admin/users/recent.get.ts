@@ -42,11 +42,17 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Get all users
-    const users = await userStore.find({});
+    // Get all users and sort by creation date (newest first)
+    const allUsers = await userStore.find({});
+    const sortedUsers = allUsers.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    // Get the 5 most recent users
+    const recentUsers = sortedUsers.slice(0, 5);
 
     // Remove sensitive information
-    const safeUsers = users.map(user => ({
+    const safeUsers = recentUsers.map(user => ({
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -62,10 +68,10 @@ export default defineEventHandler(async (event) => {
       data: safeUsers
     };
   } catch (error: any) {
-    console.error('Error fetching users:', error);
+    console.error('Error fetching recent users:', error);
     throw createError({
       statusCode: 500,
-      message: 'Failed to fetch users'
+      message: 'Failed to fetch recent users'
     });
   }
 }); 

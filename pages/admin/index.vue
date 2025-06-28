@@ -389,6 +389,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
 import { useCourseStore } from '~/stores/courseStore';
+import { useAdminStore } from '~/stores/adminStore';
 
 // Page metadata
 definePageMeta({
@@ -398,63 +399,13 @@ definePageMeta({
 // Stores
 const authStore = useAuthStore();
 const courseStore = useCourseStore();
+const adminStore = useAdminStore();
 
 // Computed
 const user = computed(() => authStore.user);
-
-// Reactive data
-const systemStats = ref({
-  totalUsers: 156,
-  activeCourses: 24,
-  pendingReviews: 18,
-  systemHealth: 98
-});
-
-// Mock data for demonstration
-const recentUsers = ref([
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    role: 'student'
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane.smith@example.com',
-    role: 'staff'
-  },
-  {
-    id: '3',
-    firstName: 'Bob',
-    lastName: 'Johnson',
-    email: 'bob.johnson@example.com',
-    role: 'student'
-  }
-]);
-
-const systemActivity = ref([
-  {
-    id: '1',
-    title: 'New user registered',
-    description: 'John Doe created a new student account',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
-  },
-  {
-    id: '2',
-    title: 'Course created',
-    description: 'Jane Smith created "Advanced Mathematics" course',
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
-  },
-  {
-    id: '3',
-    title: 'System backup completed',
-    description: 'Daily backup completed successfully',
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
-  }
-]);
+const systemStats = computed(() => adminStore.systemStats);
+const recentUsers = computed(() => adminStore.recentUsers);
+const systemActivity = computed(() => adminStore.systemActivity);
 
 // Methods
 const formatDate = (date: Date) => {
@@ -468,6 +419,11 @@ const formatDate = (date: Date) => {
 
 // Lifecycle
 onMounted(async () => {
-  await courseStore.fetchCourses();
+  await Promise.all([
+    courseStore.fetchCourses(),
+    adminStore.fetchSystemStats(),
+    adminStore.fetchRecentUsers(),
+    adminStore.fetchSystemActivity()
+  ]);
 });
 </script> 

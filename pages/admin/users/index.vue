@@ -187,18 +187,18 @@
                   <span
                     :class="[
                       'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                      user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      (user.status || 'active') === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
                       'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                     ]"
                   >
-                    {{ user.status }}
+                    {{ user.status || 'active' }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {{ formatDate(user.createdAt) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {{ user.lastLoginAt ? formatDate(user.lastLoginAt) : 'Never' }}
+                  Never
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end space-x-2">
@@ -261,6 +261,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
+import { useAdminStore } from '~/stores/adminStore';
 
 // Page metadata
 definePageMeta({
@@ -269,69 +270,25 @@ definePageMeta({
 
 // Stores
 const authStore = useAuthStore();
+const adminStore = useAdminStore();
 
 // Reactive data
-const loading = ref(false);
 const searchQuery = ref('');
 const roleFilter = ref('');
 const statusFilter = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 
-// Mock users data
-const users = ref([
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    role: 'student',
-    status: 'active',
-    createdAt: new Date('2024-01-15'),
-    lastLoginAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-  },
-  {
-    id: '2',
-    firstName: 'Jane',
-    lastName: 'Smith',
-    email: 'jane.smith@example.com',
-    role: 'staff',
-    status: 'active',
-    createdAt: new Date('2024-01-10'),
-    lastLoginAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-  },
-  {
-    id: '3',
-    firstName: 'Bob',
-    lastName: 'Johnson',
-    email: 'bob.johnson@example.com',
-    role: 'student',
-    status: 'inactive',
-    createdAt: new Date('2024-01-05'),
-    lastLoginAt: null
-  },
-  {
-    id: '4',
-    firstName: 'Alice',
-    lastName: 'Brown',
-    email: 'alice.brown@example.com',
-    role: 'admin',
-    status: 'active',
-    createdAt: new Date('2024-01-01'),
-    lastLoginAt: new Date(Date.now() - 30 * 60 * 1000)
-  }
-]);
-
 // Computed
 const filteredUsers = computed(() => {
-  return users.value.filter(user => {
+  return adminStore.users.filter(user => {
     const matchesSearch = !searchQuery.value || 
       user.firstName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       user.lastName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.value.toLowerCase());
     
     const matchesRole = !roleFilter.value || user.role === roleFilter.value;
-    const matchesStatus = !statusFilter.value || user.status === statusFilter.value;
+    const matchesStatus = !statusFilter.value || (user.status || 'active') === statusFilter.value;
     
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -344,6 +301,8 @@ const paginatedUsers = computed(() => {
   const end = start + itemsPerPage.value;
   return filteredUsers.value.slice(start, end);
 });
+
+const loading = computed(() => adminStore.loading);
 
 // Methods
 const formatDate = (date: Date | null) => {
@@ -359,15 +318,22 @@ const editUser = (user: any) => {
   navigateTo(`/admin/users/${user.id}/edit`);
 };
 
-const toggleUserStatus = (user: any) => {
-  user.status = user.status === 'active' ? 'inactive' : 'active';
-  // In real app, this would make an API call
+const toggleUserStatus = async (user: any) => {
+  try {
+    const newStatus = (user.status || 'active') === 'active' ? 'inactive' : 'active';
+    await adminStore.updateUser(user.id, { status: newStatus });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+  }
 };
 
-const deleteUser = (user: any) => {
+const deleteUser = async (user: any) => {
   if (confirm(`Are you sure you want to delete ${user.firstName} ${user.lastName}?`)) {
-    users.value = users.value.filter(u => u.id !== user.id);
-    // In real app, this would make an API call
+    try {
+      await adminStore.deleteUser(user.id);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
   }
 };
 
@@ -378,9 +344,6 @@ watch([searchQuery, roleFilter, statusFilter], () => {
 
 // Lifecycle
 onMounted(async () => {
-  loading.value = true;
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  loading.value = false;
+  await adminStore.fetchUsers();
 });
 </script> 

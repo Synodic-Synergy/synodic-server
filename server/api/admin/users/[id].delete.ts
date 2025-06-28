@@ -34,38 +34,53 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Only admin can access user management
+    // Only admin can delete users
     if (user.role !== 'admin') {
       throw createError({
         statusCode: 403,
-        message: 'Forbidden: Only admin can access user management'
+        message: 'Forbidden: Only admin can delete users'
       });
     }
 
-    // Get all users
-    const users = await userStore.find({});
+    // Extract user ID from URL
+    const urlParts = event.path.split('/');
+    const userId = urlParts[urlParts.length - 1];
+    if (!userId) {
+      throw createError({
+        statusCode: 400,
+        message: 'User ID is required'
+      });
+    }
 
-    // Remove sensitive information
-    const safeUsers = users.map(user => ({
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      status: user.status || 'active',
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }));
+    // Prevent admin from deleting themselves
+    if (userId === user.id) {
+      throw createError({
+        statusCode: 400,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    // Find the user to delete
+    const userToDelete = await userStore.findById(userId);
+    if (!userToDelete) {
+      throw createError({
+        statusCode: 404,
+        message: 'User not found'
+      });
+    }
+
+    // Delete user
+    await userStore.delete(userId);
 
     return {
       success: true,
-      data: safeUsers
+      message: 'User deleted successfully'
     };
   } catch (error: any) {
-    console.error('Error fetching users:', error);
+    console.error('Error deleting user:', error);
     throw createError({
       statusCode: 500,
-      message: 'Failed to fetch users'
+      message: 'Failed to delete user'
     });
   }
 }); 

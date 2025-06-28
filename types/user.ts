@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   firstName: string;
   lastName: string;
+  status?: 'active' | 'inactive'; // Optional for backward compatibility
   createdAt: Date;
   updatedAt: Date;
 }

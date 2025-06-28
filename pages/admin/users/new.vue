@@ -276,6 +276,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
+import { useAdminStore } from '~/stores/adminStore';
 
 // Page metadata
 definePageMeta({
@@ -284,9 +285,10 @@ definePageMeta({
 
 // Stores
 const authStore = useAuthStore();
+const adminStore = useAdminStore();
 
 // Reactive data
-const loading = ref(false);
+const loading = computed(() => adminStore.loading);
 const success = ref(false);
 const errors = ref<string[]>([]);
 
@@ -346,29 +348,23 @@ const createUser = async () => {
     return;
   }
 
-  loading.value = true;
   errors.value = [];
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const userData = {
+      firstName: form.value.firstName,
+      lastName: form.value.lastName,
+      email: form.value.email,
+      role: form.value.role as 'admin' | 'staff' | 'student',
+      status: form.value.status as 'active' | 'inactive',
+      password: form.value.password,
+      studentId: form.value.studentId,
+      grade: form.value.grade,
+      department: form.value.department,
+      position: form.value.position
+    };
 
-    // In real app, this would be an API call
-    // const response = await $fetch('/api/admin/users', {
-    //   method: 'POST',
-    //   body: {
-    //     firstName: form.value.firstName,
-    //     lastName: form.value.lastName,
-    //     email: form.value.email,
-    //     role: form.value.role,
-    //     status: form.value.status,
-    //     password: form.value.password,
-    //     studentId: form.value.studentId,
-    //     grade: form.value.grade,
-    //     department: form.value.department,
-    //     position: form.value.position
-    //   }
-    // });
+    await adminStore.createUser(userData);
 
     success.value = true;
     
@@ -394,8 +390,6 @@ const createUser = async () => {
 
   } catch (error: any) {
     errors.value.push(error.message || 'Failed to create user');
-  } finally {
-    loading.value = false;
   }
 };
 
