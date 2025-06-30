@@ -61,16 +61,11 @@
             Attendance sessions will appear here when you start tracking
           </p>
         </div>
-        <MotionButton 
-          class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3 rounded-xl font-semibold text-lg"
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0 }"
-          :transition="{ duration: 500, delay: 200 }"
-          :hover="{ scale: 1.05 }"
-          :tap="{ scale: 0.95 }"
+        <button
+          class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
         >
           Start Tracking
-        </MotionButton>
+        </button>
       </MotionCard>
 
       <!-- Attendance Sessions -->
@@ -163,22 +158,20 @@
               </div>
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Action Buttons with navigation -->
             <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-600/30">
-              <MotionButton 
-                class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300"
-                :hover="{ scale: 1.05 }"
-                :tap="{ scale: 0.95 }"
+              <button
+                @click="$router.push(`/teach/attendance/${session.id}/edit`)"
+                class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               >
                 Edit Record
-              </MotionButton>
-              <MotionButton 
-                class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300"
-                :hover="{ scale: 1.05 }"
-                :tap="{ scale: 0.95 }"
+              </button>
+              <button
+                @click="$router.push(`/teach/attendance/${session.id}/report`)"
+                class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
               >
                 Export Report
-              </MotionButton>
+              </button>
             </div>
           </div>
         </MotionCard>

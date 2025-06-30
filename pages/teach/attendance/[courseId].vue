@@ -23,8 +23,18 @@
                 <span class="text-white font-semibold">{{ student.name }}</span>
               </div>
               <div class="flex gap-2">
-                <MotionButton @click="markPresent(student.id)" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold" :hover="{ scale: 1.05 }">Present</MotionButton>
-                <MotionButton @click="markAbsent(student.id)" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold" :hover="{ scale: 1.05 }">Absent</MotionButton>
+                <button
+                  @click="markPresent(student.id)"
+                  class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-green-400"
+                >
+                  Present
+                </button>
+                <button
+                  @click="markAbsent(student.id)"
+                  class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-red-400"
+                >
+                  Absent
+                </button>
               </div>
             </div>
           </div>

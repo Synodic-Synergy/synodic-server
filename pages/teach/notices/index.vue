@@ -25,20 +25,15 @@
                 Create and manage announcements for your students
               </p>
             </div>
-            <MotionButton 
-              to="/teach/notices/new"
-              class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg"
-              :initial="{ opacity: 0, scale: 0.9 }"
-              :enter="{ opacity: 1, scale: 1 }"
-              :transition="{ duration: 500, delay: 200 }"
-              :hover="{ scale: 1.05 }"
-              :tap="{ scale: 0.95 }"
+            <button
+              @click="$router.push('/teach/notices/new')"
+              class="flex items-center bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
             >
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               New Notice
-            </MotionButton>
+            </button>
           </div>
         </div>
       </MotionCard>
@@ -79,17 +74,12 @@
             Start by creating your first announcement for your students
           </p>
         </div>
-        <MotionButton 
-          to="/teach/notices/new"
-          class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-8 py-3 rounded-xl font-semibold text-lg"
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0 }"
-          :transition="{ duration: 500, delay: 200 }"
-          :hover="{ scale: 1.05 }"
-          :tap="{ scale: 0.95 }"
+        <button
+          @click="$router.push('/teach/notices/new')"
+          class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
         >
           Create First Notice
-        </MotionButton>
+        </button>
       </MotionCard>
 
       <!-- Notices List -->
@@ -151,20 +141,18 @@
                   {{ notice.priority }}
                 </span>
                 <div class="flex space-x-2">
-                  <MotionButton 
-                    class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-3 py-1 rounded-lg font-semibold text-sm transition-all duration-300"
-                    :hover="{ scale: 1.05 }"
-                    :tap="{ scale: 0.95 }"
+                  <button
+                    @click="$router.push(`/teach/notices/${notice.id}`)"
+                    class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-3 py-1 rounded-lg font-semibold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
                     Edit
-                  </MotionButton>
-                  <MotionButton 
-                    class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-3 py-1 rounded-lg font-semibold text-sm transition-all duration-300"
-                    :hover="{ scale: 1.05 }"
-                    :tap="{ scale: 0.95 }"
+                  </button>
+                  <button
+                    @click="deleteNotice(notice.id)"
+                    class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-3 py-1 rounded-lg font-semibold text-sm transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
                   >
                     Delete
-                  </MotionButton>
+                  </button>
                 </div>
               </div>
             </div>
@@ -186,4 +174,16 @@ const noticeStore = useNoticeStore();
 onMounted(() => {
   noticeStore.fetchTeachNotices();
 });
+
+function deleteNotice(noticeId: string) {
+  if (confirm('Are you sure you want to delete this notice?')) {
+    // TODO: Implement actual delete logic in the store if not present
+    if (typeof noticeStore.deleteNotice === 'function') {
+      noticeStore.deleteNotice(noticeId);
+    } else {
+      // eslint-disable-next-line no-console
+      console.warn('deleteNotice method not implemented in noticeStore');
+    }
+  }
+}
 </script> 

@@ -12,7 +12,12 @@
             <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-violet-400 bg-clip-text text-transparent mb-2">All Lessons</h1>
             <p class="text-gray-300 text-lg">Manage and edit lessons for your courses</p>
           </div>
-          <MotionButton to="/teach/lessons/new" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold" :hover="{ scale: 1.05 }" :tap="{ scale: 0.95 }">Add Lesson</MotionButton>
+          <button
+            @click="$router.push('/teach/lessons/new')"
+            class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          >
+            Add Lesson
+          </button>
         </div>
       </MotionCard>
       <MotionCard class="bg-gradient-to-br from-gray-800/50 to-gray-700/50 backdrop-blur-xl border border-gray-600/30" :initial="{ opacity: 0, y: 50 }" :enter="{ opacity: 1, y: 0 }" :transition="{ duration: 600, delay: 200 }">
@@ -26,7 +31,12 @@
               <p class="text-gray-300 text-sm mb-4 line-clamp-3">{{ lesson.description }}</p>
               <div class="flex items-center justify-between text-xs text-gray-400">
                 <span>{{ formatDate(lesson.createdAt) }}</span>
-                <MotionButton :to="`/teach/lessons/${lesson.id}`" class="text-purple-400 hover:text-purple-300" :hover="{ scale: 1.1 }">Edit</MotionButton>
+                <button
+                  @click="$router.push(`/teach/lessons/${lesson.id}`)"
+                  class="text-purple-400 hover:text-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  Edit
+                </button>
               </div>
             </MotionTile>
           </div>
@@ -38,7 +48,12 @@
             </div>
             <h3 class="text-lg font-semibold text-white mb-2">No Lessons Yet</h3>
             <p class="text-gray-400 mb-6">Start by creating your first lesson</p>
-            <MotionButton to="/teach/lessons/new" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold" :hover="{ scale: 1.05 }" :tap="{ scale: 0.95 }">Create First Lesson</MotionButton>
+            <button
+              @click="$router.push('/teach/lessons/new')"
+              class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400"
+            >
+              Create First Lesson
+            </button>
           </div>
         </div>
       </MotionCard>

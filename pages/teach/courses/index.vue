@@ -25,20 +25,15 @@
                 Manage your teaching courses and student progress
               </p>
             </div>
-            <MotionButton 
-              to="/teach/courses/new"
-              class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg"
-              :initial="{ opacity: 0, scale: 0.9 }"
-              :enter="{ opacity: 1, scale: 1 }"
-              :transition="{ duration: 500, delay: 200 }"
-              :hover="{ scale: 1.05 }"
-              :tap="{ scale: 0.95 }"
+            <button
+              @click="$router.push('/teach/courses/new')"
+              class="flex items-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
             >
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               New Course
-            </MotionButton>
+            </button>
           </div>
         </div>
       </MotionCard>
@@ -79,17 +74,12 @@
             Start by creating your first course to begin teaching
           </p>
         </div>
-        <MotionButton 
-          to="/teach/courses/new"
-          class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl font-semibold text-lg"
-          :initial="{ opacity: 0, y: 20 }"
-          :enter="{ opacity: 1, y: 0 }"
-          :transition="{ duration: 500, delay: 200 }"
-          :hover="{ scale: 1.05 }"
-          :tap="{ scale: 0.95 }"
+        <button
+          @click="$router.push('/teach/courses/new')"
+          class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
         >
           Create First Course
-        </MotionButton>
+        </button>
       </MotionCard>
 
       <!-- Courses List -->
@@ -140,22 +130,20 @@
                 </div>
               </div>
 
-              <!-- Action Buttons -->
-              <div class="flex flex-col space-y-2 ml-4">
-                <MotionButton 
-                  class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300"
-                  :hover="{ scale: 1.05 }"
-                  :tap="{ scale: 0.95 }"
+              <!-- Action Buttons with navigation -->
+              <div class="flex flex-col gap-2 ml-4">
+                <button
+                  @click="$router.push(`/teach/courses/${course.id}`)"
+                  class="px-6 py-2 rounded-xl font-semibold text-base border-2 border-pink-400 bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md focus:outline-none focus:ring-2 focus:ring-pink-300 transition-all duration-200"
                 >
                   Edit Course
-                </MotionButton>
-                <MotionButton 
-                  class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300"
-                  :hover="{ scale: 1.05 }"
-                  :tap="{ scale: 0.95 }"
+                </button>
+                <button
+                  @click="$router.push(`/teach/courses/${course.id}/students`)"
+                  class="px-6 py-2 rounded-xl font-semibold text-base border-2 border-gray-600 bg-gradient-to-r from-gray-700 to-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-200"
                 >
                   View Students
-                </MotionButton>
+                </button>
               </div>
             </div>
           </div>

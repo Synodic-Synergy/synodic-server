@@ -30,10 +30,20 @@
               <textarea id="content" v-model="content" rows="8" required class="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 resize-none"></textarea>
             </div>
             <div class="flex justify-end gap-4 pt-6">
-              <MotionButton to="/teach/lessons" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300" :hover="{ scale: 1.05 }" :tap="{ scale: 0.95 }">Back</MotionButton>
-              <MotionButton type="submit" :disabled="isSaving" class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300" :hover="{ scale: 1.05 }" :tap="{ scale: 0.95 }">
+              <button
+                @click="$router.push('/teach/lessons')"
+                type="button"
+                class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                :disabled="isSaving"
+                class="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-3 rounded-xl font-semibold text-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+              >
                 {{ isSaving ? 'Saving...' : 'Save Changes' }}
-              </MotionButton>
+              </button>
             </div>
           </form>
         </div>
